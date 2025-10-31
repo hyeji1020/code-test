@@ -20,8 +20,36 @@ import lombok.Setter;
  */
 public class Product {
 
+    /*
+     * 문제: 제약조건을 설정하지 않음.
+     * 원인: DB에서는 컬럼에 제약 조건을 걸어두었지만, JPA 엔티티에서는 명시하지 않아 일관성이 깨짐.
+     * JPA로 스키마를 생성하여 코드 기반으로 테이블 관리한다면 의도와 다르게 테이블이 생성될 수 있음.
+     * DB 생성시에는 제약조건이 있지만, 해당 코드에서 없다면 불일치 문제 예상.
+     * 개선안: 실제 DB 스키마에 맞게 엔티티에도 컬럼 제약을 명시.
+     * @Id
+     * @Column(name = "product_id, nullable = false")
+     * @GeneratedValue(strategy = GenerationType.AUTO)
+     * private Long id;
+     *
+     * @Column(name = "category", length = 255")
+     * private String category;
+     *
+     * @Column(name = "name", length = 255)
+     * private String name;
+     *
+     * ps. 실제 db 스키마 기반으로 제약조건 참고하였습니다.
+     */
+
     @Id
     @Column(name = "product_id")
+    /*
+     * 문제: 현재 환경이 H2로 확정되어 있는데, AUTO 전략 사용.
+     * 원인: AUTO 전략은 DB 벤더에 맞게 동적으로 바뀌기 때문에 DB 환경 예측 범위가 넓음.
+     * 개선안:
+     * 동작상 문제는 없지만 현재는 H2 데이터베이스 환경이 정해져 있어서,
+     * 환경에 대한 명시성을 높이기 위해 SEQUENCE 전략을 사용해도 좋을 거 같음.
+     * @GeneratedValue(strategy = GenerationType.AUTO) -> @GeneratedValue(strategy = GenerationType.SEQUENCE)
+     */
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
@@ -38,6 +66,24 @@ public class Product {
     protected Product() {
     }
 
+    /*
+     * 문제:
+     * 1. 위와 같은 필드 제약조건(ex. "nullable = false")과 상관없이 객체 생성 가능.
+     * 2. 생성자 파라미터 변경시, 해당 생성자 사용 코드 찾아서 수정해야함.
+     * 3. 컨텍스트에 있는 엔티티 또 생성하면 영속성 컨텍스트 불일치 문제 발생.
+     *
+     * 원인:
+     * 1. public은 외부에서 모두 접근 가능하여 자유롭게 객체 생성 가능.
+     * 2. 직접 new Product()로 객체 생성하기 때문에, 기존 생성자 파라미터 구조대로 작성해야함.
+     * 3. new Product()로 객체 생성하면 영속성 컨텍스트 관리 대상이 아니기 때문에,
+     * 동일한 ID를 가진 객체가 존재한다면 불일치 문제 발생.
+     *
+     * 개선안:
+     * 1. protect로 생성하여 외부 객체 생성 보호.
+     * 2. public static 으로 객체 없이 누구나 바로 생성 가능하게 하고, 내부에 필드 제약조건 추가.
+     *
+     * ps. 만약 테스트 전용 객체 생성이 필요하다면, Fixture를 별도로 두어 관리하는 방법도 있을 것 같습니다.
+     */
     public Product(String category, String name) {
         this.category = category;
         this.name = name;
