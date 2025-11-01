@@ -8,7 +8,7 @@ import lombok.Setter;
  * 해당 코멘트는 CreateProductRequest.java의 리뷰와 동일합니다.
  * 공통문제 및 원인:
  * 1. @Setter 사용 - RequestDTO 값은 변경 될 일이 없기 때문에 불필요.
- * 2. 기본 생성자 누락 - 인하여 클라이언트가 보낸 객체를 JSON으로 변환하지 못하는 에러 발생.
+ * 2. 기본 생성자 누락 - 클라이언트가 보낸 객체를 JSON으로 변환하지 못하는 에러 발생.
  * 3. 유효성 검증 누락 - DB 스키마에 맞지 않는 값이나 null 값 전달하여 에러 발생.
  *
  * 개선안:
@@ -25,6 +25,14 @@ public class UpdateProductRequest {
     private String category;
     private String name;
 
+    /*
+     * 해당 코멘트는 CreateProductRequest.java의 리뷰와 동일합니다.
+     * 문제 및 원인:
+     * 1. 필드 조합별로 생성자 생성으로 가독성 및 유지보수 저하.
+     *
+     * 개선안:
+     * 1. @Builder를 사용하여, 유동적으로 조합별 객체 생성 처리.
+     */
     public UpdateProductRequest(Long id) {
         this.id = id;
     }

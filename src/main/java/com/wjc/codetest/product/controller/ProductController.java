@@ -87,8 +87,8 @@ public class ProductController {
      * 2. 수정하려는 객체를 식별하는 ID를 RequestBody에 포함.
      *
      * 개선안:
-     * 1. 현재 product의 전체 필드를 수정 가능해서 부분 수정인 @PatchMapping 대신 @PutMapping 사용.
-     * @PostMapping(value = "/update/product") -> @PutMapping("/{productId}")
+     * 1. 현재 UpdateProductRequest 내부의 생성자를 통해 일부 필드 수정용으로 추측되어, @PatchMapping 사용.
+     * @PostMapping(value = "/update/product") -> @PatchMapping("/{productId}")
      * 2. 기능상 문제는 없지만, URI에 @PathVariable로 ID 값을 받아 어떤 객체를 수정하여 직관적으로 명시.
      * updateProduct(@Valid @RequestBody UpdateProductRequest dto, @PathVariable(name = "productId") Long productId)
      */
