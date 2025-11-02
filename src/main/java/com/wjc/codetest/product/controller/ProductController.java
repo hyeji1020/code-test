@@ -2,12 +2,13 @@ package com.wjc.codetest.product.controller;
 
 import com.wjc.codetest.product.model.request.CreateProductRequest;
 import com.wjc.codetest.product.model.request.GetProductListRequest;
-import com.wjc.codetest.product.model.domain.Product;
 import com.wjc.codetest.product.model.request.UpdateProductRequest;
 import com.wjc.codetest.product.model.response.ProductListResponse;
+import com.wjc.codetest.product.model.response.ProductResponse;
 import com.wjc.codetest.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,7 @@ import java.util.List;
 * ps. 프론트엔드와의 협업과 버전관리를 고려할 때,
 * 페이지 라우트와 데이터 요청을 정확히 구분하기 위해 ("/api/v1/products")로 명시하는 방법도 있습니다.
 */
-@RequestMapping
+@RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
@@ -43,23 +44,16 @@ public class ProductController {
      * ps. 원인과 수정 전,후 코드는 각 메서드별로 기재하였습니다. 코드가 길어지는 경우 수정후 코드만 기재하였습니다.
      */
 
-    /*
-     * 원인: URL에 HTTP 메서드(get), 조건(by) 포함하여 네이밍 규칙 위반
-     * 개선안: @GetMapping(value = "/get/product/by/{productId}") -> @GetMapping(value = "/{productId}")
-     */
-    @GetMapping(value = "/get/product/by/{productId}")
-    public ResponseEntity<Product> getProductById(@PathVariable(name = "productId") Long productId){
-        Product product = productService.getProductById(productId);
-        return ResponseEntity.ok(product);
+    @GetMapping(value = "/{productId}")
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable(name = "productId") Long productId){
+        ProductResponse response = productService.getProductById(productId);
+        return ResponseEntity.ok(response);
     }
 
-    /*
-     * 개선안: @PostMapping(value = "/create/product") -> @PostMapping
-     */
-    @PostMapping(value = "/create/product")
-    public ResponseEntity<Product> createProduct(@RequestBody CreateProductRequest dto){
-        Product product = productService.create(dto);
-        return ResponseEntity.ok(product);
+    @PostMapping
+    public ResponseEntity<ProductResponse> createProduct(@RequestBody CreateProductRequest dto){
+        ProductResponse response = productService.create(dto);
+        return ResponseEntity.ok(response);
     }
 
     /*
@@ -75,9 +69,9 @@ public class ProductController {
      * 1. @PostMapping(value = "/delete/product/{productId}") -> @DeleteMapping(value = "/{productId}")
      * 2. 응답 DTO를 사용해 팀 컨벤션에 맞게 삭제 결과 정보를 포함하거나, HTTP 204(No Content) 상태코드로 반환.
      */
-    @PostMapping(value = "/delete/product/{productId}")
+    @DeleteMapping(value = "/{productId}")
     public ResponseEntity<Boolean> deleteProduct(@PathVariable(name = "productId") Long productId){
-        productService.deleteById(productId);
+        productService.deleteProductById(productId);
         return ResponseEntity.ok(true);
     }
 
@@ -92,10 +86,11 @@ public class ProductController {
      * 2. 기능상 문제는 없지만, URI에 @PathVariable로 ID 값을 받아 어떤 객체를 수정하여 직관적으로 명시.
      * updateProduct(@Valid @RequestBody UpdateProductRequest dto, @PathVariable(name = "productId") Long productId)
      */
-    @PostMapping(value = "/update/product")
-    public ResponseEntity<Product> updateProduct(@RequestBody UpdateProductRequest dto){
-        Product product = productService.update(dto);
-        return ResponseEntity.ok(product);
+    @PatchMapping(value = "/{productId}")
+    public ResponseEntity<ProductResponse> updateProduct(@PathVariable(name = "productId") Long productId
+                                                 , @RequestBody UpdateProductRequest dto){
+        ProductResponse response = productService.updateProductById(productId, dto);
+        return ResponseEntity.ok(response);
     }
 
     /*
@@ -107,17 +102,26 @@ public class ProductController {
      * 개선안:
      * 1. 조회 HTTP 메서드 @GetMapping 사용과, 추후 필터링 데이터가 추가될 경우를 고려해서 @RequestParam 대신 @ModelAttribute 사용.
      * 2, 3. pageable 객체 생성 없이 기본값을 자동으로 적용시키는 @PageableDefault 사용하여 편리성과 안정성 높임.
+     *
+     * 추가 고려사항:
+     * Pageable은 기본적으로 페이지 번호를 0부터 시작하기 때문에 프론트엔드에서 혼란이 발생할 수 있습니다.
+     * 이를 해결하기 위해 DTO 내부에서 (page - 1)로 보정하여 @PageableDefault 대신 DTO 기반으로 PageRequest를 생성하는 방식을 적용했습니다.
      */
-    @PostMapping(value = "/product/list")
-    public ResponseEntity<ProductListResponse> getProductListByCategory(@RequestBody GetProductListRequest dto){
-        Page<Product> productList = productService.getListByCategory(dto);
-        return ResponseEntity.ok(new ProductListResponse(productList.getContent(), productList.getTotalPages(), productList.getTotalElements(), productList.getNumber()));
+    @GetMapping
+    public ResponseEntity<ProductListResponse> getProductListByCategory(@ModelAttribute GetProductListRequest dto
+//                                                                        @PageableDefault(sort = "category", direction = Sort.Direction.ASC, size = 5)
+//                                                                        Pageable pageable
+                                                                        ){
+
+        Pageable pageable = dto.toPageable(Sort.by(Sort.Direction.ASC, "category"));
+
+        return ResponseEntity.ok(productService.getListByCategory(dto, pageable));
     }
 
     /*
     * 개선안: @GetMapping(value = "/product/category/list") -> @GetMapping
     */
-    @GetMapping(value = "/product/category/list")
+    @GetMapping("/categories")
     public ResponseEntity<List<String>> getProductListByCategory(){
         List<String> uniqueCategories = productService.getUniqueCategories();
         return ResponseEntity.ok(uniqueCategories);
