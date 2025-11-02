@@ -18,7 +18,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     * 원인: String category 대신 String name으로 전달.
     * 개선안: findAllByCategory(String category, Pageable pageable);
     * */
-    Page<Product> findAllByCategory(String name, Pageable pageable);
+    Page<Product> findAllByCategory(String category, Pageable pageable);
 
     @Query("SELECT DISTINCT p.category FROM Product p")
     List<String> findDistinctCategories();
