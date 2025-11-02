@@ -13,8 +13,8 @@ public class ProductValidator {
 
     private final ProductRepository productRepository;
 
-    public Product validate(Long postingId) {
-        return productRepository.findById(postingId)
+    public Product validate(Long productId) {
+        return productRepository.findById(productId)
                 .orElseThrow(ProductNotFoundException::new);
     }
 
