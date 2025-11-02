@@ -106,7 +106,10 @@ public class ProductController {
      *
      * 개선안:
      * 1. 조회 HTTP 메서드 @GetMapping 사용과, 추후 필터링 데이터가 추가될 경우를 고려해서 @RequestParam 대신 @ModelAttribute 사용.
-     * 2, 3. pageable 객체 생성 없이 기본값을 자동으로 적용시키는 @PageableDefault 사용하여 편리성과 안정성 높임.
+     * 2, 3. 기본값을 자동으로 적용시키고 바인딩해주는 @PageableDefault 사용하거나,
+     *  GetProductListRequest를 pageable로 변환하여 사용.
+     *
+     * ps. GetProductListRequest.java 에 추가 의견 남겼습니다.
      */
     @PostMapping(value = "/product/list")
     public ResponseEntity<ProductListResponse> getProductListByCategory(@RequestBody GetProductListRequest dto){
