@@ -4,13 +4,15 @@ import com.wjc.codetest.product.model.request.CreateProductRequest;
 import com.wjc.codetest.product.model.request.GetProductListRequest;
 import com.wjc.codetest.product.model.domain.Product;
 import com.wjc.codetest.product.model.request.UpdateProductRequest;
+import com.wjc.codetest.product.model.response.ProductListResponse;
+import com.wjc.codetest.product.model.response.ProductResponse;
 import com.wjc.codetest.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -20,6 +22,7 @@ import java.util.*;
  * 개선안:
  * 1. 로그가 필요하다면 레벨(INFO, WARN, ERROR 등)에 맞게 로그 작성.
  * 2. 로그를 사용하지 않는다면 @Slf4j 어노테이션을 제거.
+ * TODO: 로깅 설정
  */
 @Slf4j
 @Service
@@ -28,17 +31,13 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    /*
-     * 공통 문제: @Transactional 누락으로 인한 데이터 일관성 및 성능 저하.
-     * 개선안:
-     * 1. 조회 메서드에는 @Transactional(readOnly = true) 추가.
-     * 2. 생성/수정/삭제 메서드에는 @Transactional 추가.
-     */
-            
-    public Product create(CreateProductRequest dto) {
-         Product product = new Product(dto.getCategory(), dto.getName());
+    @Transactional
+    public ProductResponse create(CreateProductRequest dto) {
 
-        return productRepository.save(product);
+        Product product = Product.create(dto.category(), dto.name());
+        Product createdProduct = productRepository.save(product);
+
+        return ProductResponse.of(createdProduct);
     }
 
     /*
@@ -54,12 +53,13 @@ public class ProductService {
      * - 도메인별 커스텀 예외 처리로 클래스 파일 증가.
      * - 명확한 예외 처리 가능
      */
-    public Product getProductById(Long productId) {
-        Optional<Product> productOptional = productRepository.findById(productId);
-        if (!productOptional.isPresent()) {
-            throw new RuntimeException("product not found");
-        }
-        return productOptional.get();
+    @Transactional(readOnly = true)
+    public ProductResponse getProductById(Long productId) {
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("product not found"));
+
+        return ProductResponse.of(product);
     }
 
     /*
@@ -67,16 +67,23 @@ public class ProductService {
      * 원인: product.setCategory(dto.getCategory()), product.setName(dto.getName())
      * 개선안: product Entity에 수정이 필요한 필드에 대한 update 메서드 생성.
      */
-    public Product update(UpdateProductRequest dto) {
-        Product product = getProductById(dto.getId());
-        product.setCategory(dto.getCategory());
-        product.setName(dto.getName());
-        Product updatedProduct = productRepository.save(product);
-        return updatedProduct;
+    @Transactional
+    public ProductResponse updateProductById(Long productId, UpdateProductRequest dto) {
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("product not found"));
+
+        product.update(dto.category(), dto.name());
+
+        return ProductResponse.of(product);
     }
 
-    public void deleteById(Long productId) {
-        Product product = getProductById(productId);
+    @Transactional
+    public void deleteProductById(Long productId) {
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("product not found"));
+
         productRepository.delete(product);
     }
 
@@ -91,11 +98,26 @@ public class ProductService {
      * 1. Service는 비즈니스 로직에 집중해야 하기 때문에 요청 값에 대한 로직은 Controller에서 수행.
      * 2. DTO에서 유효성 검증 어노테이션 추가하여 사전에 차단.
      */
-    public Page<Product> getListByCategory(GetProductListRequest dto) {
-        PageRequest pageRequest = PageRequest.of(dto.getPage(), dto.getSize(), Sort.by(Sort.Direction.ASC, "category"));
-        return productRepository.findAllByCategory(dto.getCategory(), pageRequest);
+    @Transactional(readOnly = true)
+    public ProductListResponse getListByCategory(GetProductListRequest dto, Pageable pageable) {
+
+        Page<Product> productPage = productRepository.findAllByCategory(dto.category(), pageable);
+
+        List<ProductResponse> productResponseList = productPage.getContent()
+                .stream()
+                .map(ProductResponse::of)
+                .toList();
+
+        return new ProductListResponse(
+                productResponseList,
+                productPage.getTotalPages(),
+                productPage.getTotalElements(),
+                productPage.getNumber()
+        );
+
     }
 
+    @Transactional(readOnly = true)
     public List<String> getUniqueCategories() {
         return productRepository.findDistinctCategories();
     }
