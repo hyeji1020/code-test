@@ -92,9 +92,9 @@ public class ProductService {
      * 2. DTO에서 유효성 검증 어노테이션 추가하여 사전에 차단.
      */
     @Transactional(readOnly = true)
-    public ProductListResponse getListByCategory(GetProductListRequest dto, Pageable pageable) {
+    public ProductListResponse getListByCategory(String category, Pageable pageable) {
 
-        Page<Product> productPage = productRepository.findAllByCategory(dto.category(), pageable);
+        Page<Product> productPage = productRepository.findAllByCategory(category, pageable);
 
         List<ProductResponse> productResponseList = productPage.getContent()
                 .stream()

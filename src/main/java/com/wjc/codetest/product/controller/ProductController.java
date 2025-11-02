@@ -9,6 +9,7 @@ import com.wjc.codetest.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -108,14 +109,11 @@ public class ProductController {
      * 이를 해결하기 위해 DTO 내부에서 (page - 1)로 보정하여 @PageableDefault 대신 DTO 기반으로 PageRequest를 생성하는 방식을 적용했습니다.
      */
     @GetMapping
-    public ResponseEntity<ProductListResponse> getProductListByCategory(@ModelAttribute GetProductListRequest dto
-//                                                                        @PageableDefault(sort = "category", direction = Sort.Direction.ASC, size = 5)
-//                                                                        Pageable pageable
+    public ResponseEntity<ProductListResponse> getProductListByCategory(@RequestParam String category,
+                                                                        @PageableDefault(sort = "category", direction = Sort.Direction.ASC, size = 5)
+                                                                        Pageable pageable
                                                                         ){
-
-        Pageable pageable = dto.toPageable(Sort.by(Sort.Direction.ASC, "category"));
-
-        return ResponseEntity.ok(productService.getListByCategory(dto, pageable));
+        return ResponseEntity.ok(productService.getListByCategory(category, pageable));
     }
 
     /*
