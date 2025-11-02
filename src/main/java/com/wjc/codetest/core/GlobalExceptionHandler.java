@@ -1,12 +1,9 @@
-package com.wjc.codetest;
+package com.wjc.codetest.core;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 /*
@@ -18,10 +15,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 * 1. @RestControllerAdvice(@ControllerAdvice+@ResponseBody)를 사용하여 @ResponseBody 생략.
 * 2. value를 생략해 모든 컨트롤러의 예외를 일관되게 처리.
 * */
-@ControllerAdvice(value = {"com.wjc.codetest.product.controller"})
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ResponseBody
     /*
     * 문제:
     * 1. RuntimeException만 처리하고 있어 세분화된 예외처리 불가능.
