@@ -24,22 +24,23 @@ public class GlobalExceptionHandler {
     @ResponseBody
     /*
     * 문제:
-    * 1. RuntimeException만 처리하고 있어 다른 예외처리 불가능.
-    * 2. 무조건 HttpStatus.INTERNAL_SERVER_ERROR 500을 반환하여 다른 상태코드 반환 불가능.
+    * 1. RuntimeException만 처리하고 있어 세분화된 예외처리 불가능.
+    * 2. 무조건 HttpStatus.INTERNAL_SERVER_ERROR 500을 반환하여 예외별 상태 코드 구분 불가능.
     * 3. 로그 출력 시 e.getMessage()만 남겨 스택 트레이스가 기록되지 않아 원인 추적이 어려움.
     * 4. @ResponseStatus와 ResponseEntity.status() 같은 의미로 중복.
     *
     * 개선안:
-    * 1. 예외 타입별로 세분화된 예외 처리 구현.
-    * 2. 커스텀 예외별로 HTTP status 동적 설정.
+    * 1. 도메인별로 예외별로 구현하는것이 아닌(너무 많아지기 때문), 공통 예외 BaseException을 생성하여 상속받아 구현.
+    * 2. ErrorCode를 enum으로 관리하여 한 곳에서 관리하고 에러 던질 때 ErrorCode만 지정하여 일관된 구조 사용.
+    * ex) throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
     * 3. log.error 시 e 객체를 함께 전달해 스택 트레이스까지 로깅.
-    *      log.error("status :: {}, errorType :: {}, errorCause :: {}",
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "runtimeException",
-                e.getMessage(),
-                e // 추가
-        );
-    *  4. @ResponseStatus 제거하고 ResponseEntity로 상태 코드 관리.
+    * 4. @ResponseStatus 제거하고 ResponseEntity로 상태 코드 관리.
+    *
+     * 추가 고려사항:
+     * 팀에서 성공·실패 시 공통 응답 포맷을 사용하기로 했다면,
+     * - 별도의 CommonResponse 객체를 만들어 일관된 구조로 응답하도록 함.
+     * - 다만, CommonResponse만 반환하면 성공 시 HTTP 상태 코드를 200으로만 반영하므로,
+     *   ResponseEntity로 감싸 실제 상태 코드를 지정해야 함.
     * */
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
