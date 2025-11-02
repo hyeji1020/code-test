@@ -102,7 +102,7 @@ public class ProductController {
      * 문제 및 원인:
      * 1. 메서드명을 통해 조회 메서드로 추측되지만 @PostMapping 사용.
      * 2. 에러 발생 가능성 - RequestDto에 유효성 검증을 하지 않아 에러 발생 가능성.
-     * 3. 편리성 저하 - 페이징 관련 데이터를 자동 바인딩 되는 @PageableDefault 활용하지 않음.
+     * 3. 편리성 저하 - 페이징 관련 데이터를 자동 바인딩 되는 Pageable 활용하지 않음.
      *
      * 개선안:
      * 1. 조회 HTTP 메서드 @GetMapping 사용과, 추후 필터링 데이터가 추가될 경우를 고려해서 @RequestParam 대신 @ModelAttribute 사용.
