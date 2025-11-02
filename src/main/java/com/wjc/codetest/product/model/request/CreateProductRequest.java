@@ -18,7 +18,6 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@NoArgsConstructor
 public class CreateProductRequest {
     private String category;
     private String name;

@@ -19,7 +19,6 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@NoArgsConstructor
 public class UpdateProductRequest {
     private Long id; // Controller에서 @PathVariable로 받아 Restful하게 변경.
     private String category;
