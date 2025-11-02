@@ -1,6 +1,7 @@
 package com.wjc.codetest.product.model.validator;
 
 
+import com.wjc.codetest.core.exception.ProductNotFoundException;
 import com.wjc.codetest.product.model.domain.Product;
 import com.wjc.codetest.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ public class ProductValidator {
 
     public Product validate(Long postingId) {
         return productRepository.findById(postingId)
-                .orElseThrow(() -> new RuntimeException("product not found"));
+                .orElseThrow(ProductNotFoundException::new);
     }
 
 }

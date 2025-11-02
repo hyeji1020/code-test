@@ -1,9 +1,10 @@
 package com.wjc.codetest.core;
 
+import com.wjc.codetest.core.exception.BaseException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 /*
@@ -38,15 +39,17 @@ public class GlobalExceptionHandler {
      * - 다만, CommonResponse만 반환하면 성공 시 HTTP 상태 코드를 200으로만 반영하므로,
      *   ResponseEntity로 감싸 실제 상태 코드를 지정해야 함.
     * */
-    @ExceptionHandler(RuntimeException.class)
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<String> runTimeException(Exception e) {
-        log.error("status :: {}, errorType :: {}, errorCause :: {}",
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "runtimeException",
-                e.getMessage()
-        );
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity<String> handleWantedException(BaseException ex) {
+        log.error("status :: {}, errorType :: {}, errorCause :: {}",
+                ex.getHttpStatus(),
+                "BaseException",
+                ex.getMessage()
+        );
+        return ResponseEntity
+                .status(ex.getHttpStatus())
+                .body(ex.getMessage());
     }
+
 }
