@@ -6,6 +6,7 @@ import com.wjc.codetest.product.model.domain.Product;
 import com.wjc.codetest.product.model.request.UpdateProductRequest;
 import com.wjc.codetest.product.model.response.ProductListResponse;
 import com.wjc.codetest.product.model.response.ProductResponse;
+import com.wjc.codetest.product.model.validator.ProductValidator;
 import com.wjc.codetest.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ import java.util.*;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductValidator productValidator;
 
     @Transactional
     public ProductResponse create(CreateProductRequest dto) {
@@ -55,11 +57,7 @@ public class ProductService {
      */
     @Transactional(readOnly = true)
     public ProductResponse getProductById(Long productId) {
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("product not found"));
-
-        return ProductResponse.of(product);
+        return ProductResponse.of(productValidator.validate(productId));
     }
 
     /*
@@ -70,8 +68,7 @@ public class ProductService {
     @Transactional
     public ProductResponse updateProductById(Long productId, UpdateProductRequest dto) {
 
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("product not found"));
+        Product product = productValidator.validate(productId);
 
         product.update(dto.category(), dto.name());
 
@@ -80,11 +77,7 @@ public class ProductService {
 
     @Transactional
     public void deleteProductById(Long productId) {
-
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("product not found"));
-
-        productRepository.delete(product);
+        productRepository.delete(productValidator.validate(productId));
     }
 
     /*
