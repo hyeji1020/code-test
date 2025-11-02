@@ -1,4 +1,4 @@
-package com.wjc.codetest.product.model.request;
+package com.wjc.codetest.product.controller.request;
 
 import org.hibernate.validator.constraints.Length;
 

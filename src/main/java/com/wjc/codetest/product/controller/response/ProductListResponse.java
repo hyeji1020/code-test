@@ -1,4 +1,4 @@
-package com.wjc.codetest.product.model.response;
+package com.wjc.codetest.product.controller.response;
 
 import lombok.Getter;
 

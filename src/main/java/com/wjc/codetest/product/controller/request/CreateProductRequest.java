@@ -1,4 +1,4 @@
-package com.wjc.codetest.product.model.request;
+package com.wjc.codetest.product.controller.request;
 
 import com.wjc.codetest.product.model.domain.Product;
 import jakarta.validation.constraints.NotBlank;
