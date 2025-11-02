@@ -29,19 +29,7 @@ public class GetProductListRequest {
      *
      * 개선안:
      * 1. 해당 클래스에서 페이징 관련 필드(page, size) 삭제하여 별도의 PageRequestDto 생성.
-     * 2. Controller에서 Pageable을 받아 페이징 처리.
+     * 2. Controller에서 @PageableDefault로 페이징 처리.
      *
-     * 개인 의견:
-     * 1. @PageableDefault vs DTO 내 페이징 데이터 포함
-     * Pageable의 기본 page 값은 0이기 때문에 프론트엔드와 협업 시 혼동이 발생할 수 있다고 생각했습니다.
-     * @PageableDefault는 기본값을 직관적으로 설정하고 별도의 변환 없이 사용할 수 있다는 장점이 있지만,
-     * 저는 프론트에서 page=1을 전달하더라도 DTO 생성자에서 0으로 보정하여 사용하는 방식이 더 명확하다고 판단했습니다.
-     * 따라서 페이징 정보도 DTO에서 함께 관리하는 방식을 선택했습니다.
-     * 
-     * 2. 필터링 데이터와 페이징 데이터를 같은 DTO에 두는 문제
-     * 페이지 정책이 모든 기능에서 일관성 있게 정해져있고, 프로젝트 규모가 커진다면 페이징 DTO를 분리할 것 같습니다.
-     * 하지만 현재 프로젝트 규모를 고려할 때는, 함께 두어도 무방하다고 판단했습니다.
-     *
-     * 참고링크: https://claude.ai/share/2ad1a0c1-e2f7-42f4-9e38-2ef8e711a6a6
      */
 }
