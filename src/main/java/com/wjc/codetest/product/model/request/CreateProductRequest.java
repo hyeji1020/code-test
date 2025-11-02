@@ -1,8 +1,9 @@
 package com.wjc.codetest.product.model.request;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.wjc.codetest.product.model.domain.Product;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
+import org.hibernate.validator.constraints.Length;
 
 /*
  * 공통문제 및 원인:
@@ -16,37 +17,17 @@ import lombok.Setter;
  * 3. 각 필드에 맞게 @NotBlank(), @Size() 추가
  * 4. Record를 사용하여 1, 2번 개선사항을 자동으로 처리하여 더욱 간결하게 수정.
  */
-@Getter
-@Setter
-public class CreateProductRequest {
-    private String category;
-    private String name;
+public record CreateProductRequest(
 
-    /*
-     * 문제: 불필요한 생성자
-     * 현재 DB 스키마에서는 category, name에 대해 null을 허용하지만,
-     * 일반적으로 상품 생성 시 필수 항목들이기 때문에 null을 허용하지 않아야 함.
-     *
-     * 원인:
-     * category 인자만으로 product 생성가능한 부분 생성자 일부 필드에 null값 허용되는 문제.
-     *
-     * 개선안:
-     * 아래와 같은 의미 없는 생성자는 불필요.
-     */
-    public CreateProductRequest(String category) {
-        this.category = category;
-    }
+        @NotBlank(message = "카테고리는 필수 입력값입니다.")
+        @Length(min = 1, max = 255, message = "카테고리는 255자 이내로 작성해주세요.")
+        String category,
 
-    /*
-     * 문제: 불필요한 생성자
-     * Lombok에서 제공하는 @AllArgsConstructor를 사용하지 않아 일관성이 깨짐.
-     *
-     * 개선안:
-     * 생성자 삭제 후, @AllArgsConstructor 추가
-     */
-    public CreateProductRequest(String category, String name) {
-        this.category = category;
-        this.name = name;
-    }
+        @NotBlank(message = "상품명은 필수 입력값입니다.")
+        @Length(min = 1, max = 255, message = "상품명은 255자 이내로 작성해주세요.")
+        String name
+        ){
+
 }
+
 
