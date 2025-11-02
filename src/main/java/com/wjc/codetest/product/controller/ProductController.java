@@ -1,10 +1,9 @@
 package com.wjc.codetest.product.controller;
 
-import com.wjc.codetest.product.model.request.CreateProductRequest;
-import com.wjc.codetest.product.model.request.GetProductListRequest;
-import com.wjc.codetest.product.model.request.UpdateProductRequest;
-import com.wjc.codetest.product.model.response.ProductListResponse;
-import com.wjc.codetest.product.model.response.ProductResponse;
+import com.wjc.codetest.product.controller.request.CreateProductRequest;
+import com.wjc.codetest.product.controller.request.UpdateProductRequest;
+import com.wjc.codetest.product.controller.response.ProductListResponse;
+import com.wjc.codetest.product.controller.response.ProductResponse;
 import com.wjc.codetest.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
